@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <!--
+        Мы можем использовать фильтры для данных - это функции, которые позволяют
+        выполнить какие-либо действия
+        тут, например, заголовок будет выводиться большими буквами (если бы написали "lower", вывели маленькими)
+    -->
+    <h1>{{ title|upper }}</h1>
+    <!--
+        macro позволяет делать функции внутри шаблонов - мы так же название,
+        указываем параметры, значения по умолчанию, а внутри тела - html-код с переменными
+    -->
+    {% macro input(name, type='text', value='hello') %}
+        <input name="{{ name }}" type="{{ type }}" value="{{ value }}">
+    {% endmacro %}
+
+    <!--
+        с помощью конструкции filter мы можем выполнять те же самые фильтры-функции, просто обрамив данные
+        например, при использовании конструкуии ниже, весь текст будет выводиться большими буквами
+    -->
+    {% filter upper %}
+        {#        dlkfjhskdjfhs#}
+    {% endfilter %}
+
+    <!--
+        мы можем сетить переменные прямо в шаблонах и использовать их в последующем
+    -->
+    {% set test = 10 %}
+
+    {% if test > 15 %}
+        {{ input("test") }}
+        {{ input("test", "password", "1") }}
+    {% endif %}
+
+    <div>
+        <p>Rating: {{ film.rating }}</p>
+        <p>Country: {{ film.country }}</p>
+    </div>
+
+    <!-- создаем инпуты для ввода минимального и максимального значений для генерации числа из промежутка  -->
+    <input id="min" type="number" placeholder="MIN">
+    <input id="max" type="number" placeholder="MAX">
+    <br>
+    <button id="btn" style="margin: 10px;">Получить число</button>
+
+    <!-- так же делаем тег <p> - туда будем вставлять полученные данные -->
+    <p id="randint"></p>
+    <!-- скрипт для подключения JQuery -->
+    <script src="http://code.jquery.com/jquery-3.2.1.js"></script>
+    <script>
+        // функция, которая выполняется при клике на кнопку
+        $('#btn').on('click', function () {
+            // обрабатываем полученные данные с инпутов
+            let data = {}
+            if ($('#min').val()) {
+                data.min = $('#min').val()
+            }
+            if ($('#max').val()) {
+                data.max = $('#max').val()
+            }
+            // ajax-запрос
+            $.ajax({
+                url: '{{ url_for('get_random') }}', // добавляем url, откуда будем брать данные
+                method: 'get', // указываем метод
+                dataType: 'html', // тип данных
+                data: data, // данные запроса (в данном случае, там находятся GET-параметры)
+                // функция, которая вызывается при успешном получении данных
+                success: function (data) {
+                    data = JSON.parse(data)
+                    $('#randint').html(data['randint'])
+                }
+            })
+        })
+    </script>
+{% endblock %}
